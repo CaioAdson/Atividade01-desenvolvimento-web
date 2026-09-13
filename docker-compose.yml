@@ -1,4 +1,5 @@
 services:
+
   app:
     build: .
     ports:
@@ -13,5 +14,48 @@ services:
     volumes:
       - mongo-data:/data/db
 
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode
+    environment:
+      - CLUSTER_NAME=bigdata
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
+    ports:
+      - "9870:9870"
+      - "8020:8020"
+    volumes:
+      - namenode-data:/hadoop/dfs/name
+
+  datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode
+    environment:
+      - SERVICE_DEPENDS_ON=namenode:9870
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
+    depends_on:
+      - namenode
+    ports:
+      - "9864:9864"
+    volumes:
+      - datanode-data:/hadoop/dfs/data
+
+  flume:
+    build:
+      context: ./flume
+      dockerfile: Dockerfile
+    container_name: flume
+    environment:
+      FLUME_AGENT_NAME: agent
+    depends_on:
+      - namenode
+      - datanode
+    volumes:
+      - ./flume/flume.conf:/opt/flume-config/flume.conf
+      - ./events.log:/input/events.log
+      - flume-data:/flume-data
+
 volumes:
   mongo-data:
+  flume-data:
+  namenode-data:
+  datanode-data:

@@ -1,0 +1,28 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  flume:
+    image: probablyfine/flume
+    container_name: flume
+    environment:
+      FLUME_AGENT_NAME: agent
+    volumes:
+      - ./flume/flume.conf:/opt/flume-config/flume.conf
+      - ./events.log:/input/events.log
+      - flume-data:/flume-data
+
+volumes:
+  mongo-data:
+  flume-data:

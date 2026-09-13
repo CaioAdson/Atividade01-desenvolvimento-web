@@ -3,7 +3,7 @@ import random
 import time
 from datetime import datetime, timezone
 
-
+#simula a chegada contínua de dados de um e-commerce
 TIPOS_EVENTO = [
     "clique",
     "carrinho",
@@ -58,6 +58,11 @@ def gerar_evento():
 while True:
     evento = gerar_evento()
 
-    print(json.dumps(evento, ensure_ascii=False), flush=True)
+    linha = json.dumps(evento, ensure_ascii=False)
+
+    print(linha, flush=True)
+
+    with open("events.log", "a", encoding="utf-8") as arquivo:
+        arquivo.write(linha + "\n")
 
     time.sleep(2)
