@@ -55,9 +55,45 @@ services:
       - ./flume/flume.conf:/opt/flume-config/flume.conf
       - ./events.log:/input/events.log
       - flume-data:/flume-data
+  
+  flink-jobmanager:
+    image: flink:1.18-java17
+    container_name: flink-jobmanager
+    command: jobmanager
+    ports:
+      - "8081:8081"
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
+    volumes:
+      - ./events.log:/input/events.log
+
+  flink-taskmanager:
+    image: flink:1.18-java17
+    container_name: flink-taskmanager
+    command: taskmanager
+    depends_on:
+      - flink-jobmanager
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
+    volumes:
+      - ./events.log:/input/events.log
+  
+  hbase:
+    image: harisekhon/hbase:2.1
+    container_name: hbase
+    ports:
+      - "16010:16010"
+      - "16000:16000"
+      - "16020:16020"
+      - "2181:2181"
+    environment:
+      HBASE_MANAGES_ZK: "true"
+    volumes:
+      - hbase-data:/hbase-data
 
 volumes:
   mongo-data:
   flume-data:
   namenode-data:
   datanode-data:
+  hbase-data:
